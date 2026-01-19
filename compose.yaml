@@ -1,0 +1,6 @@
+﻿services:
+  pos-backend:
+    image: pos-backend
+    build:
+      context: .
+      dockerfile: src/Pos.Api/Dockerfile
