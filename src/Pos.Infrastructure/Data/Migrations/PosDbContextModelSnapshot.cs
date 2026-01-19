@@ -31,9 +31,15 @@ namespace Pos.Infrastructure.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Motive")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -57,7 +63,7 @@ namespace Pos.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Pos.Domain.Entities.Product", b =>
@@ -208,6 +214,10 @@ namespace Pos.Infrastructure.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Phone")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");

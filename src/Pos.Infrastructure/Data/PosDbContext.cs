@@ -11,6 +11,7 @@ public class PosDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Category> Categories => Set<Category>();
     public DbSet<Sale> Sales => Set<Sale>();
     public DbSet<SaleItem> SaleItems => Set<SaleItem>();
     public DbSet<CashFlow> CashFlows => Set<CashFlow>();
@@ -26,6 +27,10 @@ public class PosDbContext : DbContext
             builder.HasOne(p => p.UpdatedBy)
                 .WithMany()
                 .HasForeignKey(p => p.UpdatedById);
+
+            builder.HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId);
         });
 
         modelBuilder.Entity<Sale>(builder =>

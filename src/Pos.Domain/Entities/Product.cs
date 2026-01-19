@@ -1,5 +1,7 @@
-namespace Pos.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+
+namespace Pos.Domain.Entities;
+
 [Index(nameof(Sku), IsUnique = true)]
 public class Product
 {
