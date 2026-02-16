@@ -1,5 +1,9 @@
 bin/
 obj/
+**/bin/
+**/obj/
+src/Pos.Api/bin\\Debug/
+src/Pos.Infrastructure/bin\\Debug/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/

@@ -11,6 +11,7 @@ public class SaleService : ISaleService
     private readonly GetSaleByIdUseCase _getById;
     private readonly GetSalesByUserIdUseCase _getByUserId;
     private readonly GetSalesByDateRangeUseCase _getByDateRange;
+    private readonly GetSalesByCashBoxIdUseCase _getByCashBoxId;
     private readonly GetAllSalesUseCase _getAll;
     private readonly DeleteSaleUseCase _delete;
 
@@ -20,6 +21,7 @@ public class SaleService : ISaleService
         GetSaleByIdUseCase getById,
         GetSalesByUserIdUseCase getByUserId,
         GetSalesByDateRangeUseCase getByDateRange,
+        GetSalesByCashBoxIdUseCase getByCashBoxId,
         GetAllSalesUseCase getAll,
         DeleteSaleUseCase delete)
     {
@@ -28,6 +30,7 @@ public class SaleService : ISaleService
         _getById = getById;
         _getByUserId = getByUserId;
         _getByDateRange = getByDateRange;
+        _getByCashBoxId = getByCashBoxId;
         _getAll = getAll;
         _delete = delete;
     }
@@ -57,9 +60,14 @@ public class SaleService : ISaleService
         return _getByDateRange.ExecuteAsync(startDate, endDate);
     }
 
-    public Task<IReadOnlyList<SaleResponseDto>> GetAllAsync()
+    public Task<IReadOnlyList<SaleResponseDto>> GetByCashBoxIdAsync(Guid cashBoxId)
     {
-        return _getAll.ExecuteAsync();
+        return _getByCashBoxId.ExecuteAsync(cashBoxId);
+    }
+
+    public Task<IReadOnlyList<SaleResponseDto>> GetAllAsync(int page = 1, int pageSize = 50)
+    {
+        return _getAll.ExecuteAsync(page, pageSize);
     }
 
     public Task DeleteAsync(Guid id)

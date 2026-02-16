@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pos.Application.Dtos.Products;
 using Pos.Application.Interfaces.Services;
+using Pos.Domain.Security;
 
 namespace Pos.Api.Controllers;
 
@@ -18,21 +19,27 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = PermissionCodes.ProductsRead)]
     public async Task<ActionResult<ProductResponseDto>> GetById(Guid id)
     {
-        try
-        {
-            var product = await _productService.GetByIdAsync(id);
-            return Ok(product);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var product = await _productService.GetByIdAsync(id);
+        return Ok(product);
+    }
+
+    [HttpGet("sku/{sku}")]
+    [Authorize(Policy = PermissionCodes.ProductsRead)]
+    public async Task<ActionResult<ProductResponseDto>> GetBySku(string sku)
+    {
+        var product = await _productService.GetBySkuAsync(sku);
+        return Ok(product);
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ProductResponseDto>>> GetAll([FromQuery] string? term)
+    [Authorize(Policy = PermissionCodes.ProductsRead)]
+    public async Task<ActionResult<IReadOnlyList<ProductResponseDto>>> GetAll(
+        [FromQuery] string? term,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
     {
         if (!string.IsNullOrWhiteSpace(term))
         {
@@ -40,11 +47,12 @@ public class ProductsController : ControllerBase
             return Ok(results);
         }
 
-        var products = await _productService.GetAllAsync();
+        var products = await _productService.GetAllAsync(page, pageSize);
         return Ok(products);
     }
 
     [HttpGet("category/{categoryId:guid}")]
+    [Authorize(Policy = PermissionCodes.ProductsRead)]
     public async Task<ActionResult<IReadOnlyList<ProductResponseDto>>> GetByCategory(Guid categoryId)
     {
         var products = await _productService.GetByCategoryIdAsync(categoryId);
@@ -52,21 +60,16 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = PermissionCodes.ProductsCreate)]
     public async Task<ActionResult<ProductResponseDto>> Create([FromBody] ProductCreateDto dto)
     {
         var userId = GetUserId();
-        try
-        {
-            var created = await _productService.CreateAsync(dto, userId);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var created = await _productService.CreateAsync(dto, userId);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = PermissionCodes.ProductsUpdate)]
     public async Task<ActionResult<ProductResponseDto>> Update(Guid id, [FromBody] ProductUpdateDto dto)
     {
         var userId = GetUserId();
@@ -76,33 +79,16 @@ public class ProductsController : ControllerBase
         if (dto.Id != id)
             return BadRequest("El id del path no coincide con el id del body.");
 
-        try
-        {
-            var updated = await _productService.UpdateAsync(dto, userId);
-            return Ok(updated);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var updated = await _productService.UpdateAsync(dto, userId);
+        return Ok(updated);
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = PermissionCodes.ProductsDelete)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            await _productService.DeleteAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _productService.DeleteAsync(id);
+        return NoContent();
     }
 
     private Guid GetUserId()

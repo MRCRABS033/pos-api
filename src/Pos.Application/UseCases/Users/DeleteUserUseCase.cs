@@ -11,8 +11,12 @@ public class DeleteUserUseCase
         _userRepository = userRepository;
     }
 
-    public Task ExecuteAsync(Guid id)
+    public async Task ExecuteAsync(Guid id)
     {
-        return _userRepository.DeleteAsync(id);
+        var user = await _userRepository.GetByIdAsync(id);
+        if (user.IsOwner)
+            throw new InvalidOperationException("No se puede eliminar al usuario owner.");
+
+        await _userRepository.DeleteAsync(id);
     }
 }

@@ -25,6 +25,11 @@ public class GetSaleByIdUseCase
         {
             Id = sale.Id,
             UserId = sale.UserId,
+            CashBoxId = sale.CashBoxId,
+            PaymentType = sale.PaymentType,
+            Total = sale.Total,
+            Discount = sale.Discount,
+            ItemsCount = items.Count,
             CreatedAt = sale.CreatedAt,
             UpdatedAt = sale.UpdatedAt,
             Items = items.Select(MapItem).ToList()
@@ -38,6 +43,7 @@ public class GetSaleByIdUseCase
             Id = saleItem.Id,
             SaleId = saleItem.SaleId,
             ProductId = saleItem.ProductId,
+            ProductName = saleItem.Product?.Name,
             Quantity = saleItem.Quantity,
             UnitPrice = saleItem.UnitPrice
         };

@@ -57,9 +57,9 @@ public class SaleItemService : ISaleItemService
         return _getByProductId.ExecuteAsync(productId);
     }
 
-    public Task<IReadOnlyList<SaleItemResponseDto>> GetAllAsync()
+    public Task<IReadOnlyList<SaleItemResponseDto>> GetAllAsync(int page = 1, int pageSize = 50)
     {
-        return _getAll.ExecuteAsync();
+        return _getAll.ExecuteAsync(page, pageSize);
     }
 
     public Task DeleteAsync(Guid id)

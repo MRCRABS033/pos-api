@@ -11,6 +11,8 @@ public class CashFlowService : ICashFlowService
     private readonly GetCashFlowByIdUseCase _getById;
     private readonly GetCashFlowsByUserIdUseCase _getByUserId;
     private readonly GetCashFlowsByDateRangeUseCase _getByDateRange;
+    private readonly GetCashFlowsByCashBoxIdUseCase _getByCashBoxId;
+    private readonly GetCashFlowSummaryByCashBoxIdUseCase _getSummaryByCashBoxId;
     private readonly GetAllCashFlowsUseCase _getAll;
     private readonly DeleteCashFlowUseCase _delete;
 
@@ -20,6 +22,8 @@ public class CashFlowService : ICashFlowService
         GetCashFlowByIdUseCase getById,
         GetCashFlowsByUserIdUseCase getByUserId,
         GetCashFlowsByDateRangeUseCase getByDateRange,
+        GetCashFlowsByCashBoxIdUseCase getByCashBoxId,
+        GetCashFlowSummaryByCashBoxIdUseCase getSummaryByCashBoxId,
         GetAllCashFlowsUseCase getAll,
         DeleteCashFlowUseCase delete)
     {
@@ -28,18 +32,20 @@ public class CashFlowService : ICashFlowService
         _getById = getById;
         _getByUserId = getByUserId;
         _getByDateRange = getByDateRange;
+        _getByCashBoxId = getByCashBoxId;
+        _getSummaryByCashBoxId = getSummaryByCashBoxId;
         _getAll = getAll;
         _delete = delete;
     }
 
-    public Task<CashFlowResponseDto> CreateAsync(CashFlowCreateDto dto)
+    public Task<CashFlowResponseDto> CreateAsync(CashFlowCreateDto dto, Guid actorUserId)
     {
-        return _create.ExecuteAsync(dto);
+        return _create.ExecuteAsync(dto, actorUserId);
     }
 
-    public Task<CashFlowResponseDto> UpdateAsync(CashFlowUpdateDto dto)
+    public Task<CashFlowResponseDto> UpdateAsync(CashFlowUpdateDto dto, Guid actorUserId)
     {
-        return _update.ExecuteAsync(dto);
+        return _update.ExecuteAsync(dto, actorUserId);
     }
 
     public Task<CashFlowResponseDto> GetByIdAsync(Guid id)
@@ -57,9 +63,19 @@ public class CashFlowService : ICashFlowService
         return _getByDateRange.ExecuteAsync(startDate, endDate);
     }
 
-    public Task<IReadOnlyList<CashFlowResponseDto>> GetAllAsync()
+    public Task<IReadOnlyList<CashFlowResponseDto>> GetByCashBoxIdAsync(Guid cashBoxId)
     {
-        return _getAll.ExecuteAsync();
+        return _getByCashBoxId.ExecuteAsync(cashBoxId);
+    }
+
+    public Task<CashFlowSummaryDto> GetSummaryByCashBoxIdAsync(Guid cashBoxId)
+    {
+        return _getSummaryByCashBoxId.ExecuteAsync(cashBoxId);
+    }
+
+    public Task<IReadOnlyList<CashFlowResponseDto>> GetAllAsync(int page = 1, int pageSize = 50)
+    {
+        return _getAll.ExecuteAsync(page, pageSize);
     }
 
     public Task DeleteAsync(Guid id)

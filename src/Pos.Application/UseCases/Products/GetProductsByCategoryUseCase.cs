@@ -1,3 +1,4 @@
+using Pos.Application.Dtos.Categories;
 using Pos.Application.Dtos.Products;
 using Pos.Domain.Entities;
 using Pos.Domain.Interfaces.Repositories;
@@ -31,7 +32,14 @@ public class GetProductsByCategoryUseCase
             Stock = product.Stock,
             IsActive = product.IsActive,
             IsAvailable = product.IsAvailable,
-            CategoryId = product.CategoryId,
+            CategoryId = product.CategoryId ?? Guid.Empty,
+            Category = product.Category == null
+                ? null
+                : new CategoryResponseDto
+                {
+                    Id = product.Category.Id,
+                    Name = product.Category.Name
+                },
             CreatedAt = product.CreatedAt,
             UpdatedAt = product.UpdatedAt
         };

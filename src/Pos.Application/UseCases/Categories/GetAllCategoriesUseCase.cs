@@ -13,9 +13,9 @@ public class GetAllCategoriesUseCase
         _categoryRepository = categoryRepository;
     }
 
-    public async Task<IReadOnlyList<CategoryResponseDto>> ExecuteAsync()
+    public async Task<IReadOnlyList<CategoryResponseDto>> ExecuteAsync(int page = 1, int pageSize = 50)
     {
-        var categories = await _categoryRepository.GetAllAsync();
+        var categories = await _categoryRepository.GetAllAsync(page, pageSize);
         return categories.Select(Map).ToList();
     }
 

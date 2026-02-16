@@ -13,9 +13,9 @@ public class GetAllSaleItemsUseCase
         _saleItemRepository = saleItemRepository;
     }
 
-    public async Task<IReadOnlyList<SaleItemResponseDto>> ExecuteAsync()
+    public async Task<IReadOnlyList<SaleItemResponseDto>> ExecuteAsync(int page = 1, int pageSize = 50)
     {
-        var saleItems = await _saleItemRepository.GetAllAsync();
+        var saleItems = await _saleItemRepository.GetAllAsync(page, pageSize);
         return saleItems.Select(Map).ToList();
     }
 
@@ -26,6 +26,7 @@ public class GetAllSaleItemsUseCase
             Id = saleItem.Id,
             SaleId = saleItem.SaleId,
             ProductId = saleItem.ProductId,
+            ProductName = saleItem.Product?.Name,
             Quantity = saleItem.Quantity,
             UnitPrice = saleItem.UnitPrice
         };

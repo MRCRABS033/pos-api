@@ -20,6 +20,15 @@ public class UpdateUserUseCase
             throw new ArgumentNullException(nameof(dto), "El usuario no puede ser nulo.");
 
         var current = await _userRepository.GetByIdAsync(dto.Id);
+        if (current.IsOwner)
+        {
+            if (!dto.IsActive)
+                throw new InvalidOperationException("No se puede desactivar al usuario owner.");
+
+            if (!string.Equals(dto.Role, "Admin", StringComparison.Ordinal))
+                throw new InvalidOperationException("No se puede quitar el rol Admin al owner.");
+        }
+
         var password = string.IsNullOrWhiteSpace(dto.Password)
             ? current.Password
             : BCrypt.Net.BCrypt.HashPassword(dto.Password);
@@ -34,12 +43,16 @@ public class UpdateUserUseCase
             Phone = dto.Phone,
             Password = password,
             Role = dto.Role,
+            IsOwner = current.IsOwner,
             IsActive = dto.IsActive,
             Created = current.Created,
             Modified = DateTime.UtcNow
         };
 
         var updated = await _userRepository.UpdateAsync(user);
+        if (!string.Equals(current.Role, updated.Role, StringComparison.OrdinalIgnoreCase))
+            await _userRepository.SetDefaultPermissionsByRole(updated.Id, updated.Role);
+
         return Map(updated);
     }
 

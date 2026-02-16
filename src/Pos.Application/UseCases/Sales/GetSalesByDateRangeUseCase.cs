@@ -26,6 +26,11 @@ public class GetSalesByDateRangeUseCase
         {
             Id = sale.Id,
             UserId = sale.UserId,
+            CashBoxId = sale.CashBoxId,
+            PaymentType = sale.PaymentType,
+            Total = sale.Total,
+            Discount = sale.Discount,
+            ItemsCount = 0,
             CreatedAt = sale.CreatedAt,
             UpdatedAt = sale.UpdatedAt,
             Items = new List<SaleItemResponseDto>()

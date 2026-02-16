@@ -1,3 +1,5 @@
+using Pos.Application.Dtos.Categories;
+
 namespace Pos.Application.Dtos.Products;
 
 public class ProductResponseDto
@@ -11,6 +13,7 @@ public class ProductResponseDto
     public bool IsActive { get; set; }
     public bool IsAvailable { get; set; }
     public Guid CategoryId { get; set; }
+    public CategoryResponseDto? Category { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

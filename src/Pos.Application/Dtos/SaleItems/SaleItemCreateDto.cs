@@ -1,8 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Pos.Application.Dtos.SaleItems;
 
 public class SaleItemCreateDto
 {
+    [Required]
     public Guid ProductId { get; set; }
+
+    [Range(typeof(decimal), "0.0001", "999999999")]
     public decimal Quantity { get; set; }
+
+    [Range(typeof(decimal), "0", "999999999")]
     public decimal UnitPrice { get; set; }
 }

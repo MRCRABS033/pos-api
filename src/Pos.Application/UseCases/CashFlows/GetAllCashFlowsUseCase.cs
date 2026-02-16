@@ -13,9 +13,9 @@ public class GetAllCashFlowsUseCase
         _cashFlowRepository = cashFlowRepository;
     }
 
-    public async Task<IReadOnlyList<CashFlowResponseDto>> ExecuteAsync()
+    public async Task<IReadOnlyList<CashFlowResponseDto>> ExecuteAsync(int page = 1, int pageSize = 50)
     {
-        var cashFlows = await _cashFlowRepository.GetAllAsync();
+        var cashFlows = await _cashFlowRepository.GetAllAsync(page, pageSize);
         return cashFlows.Select(Map).ToList();
     }
 
@@ -26,7 +26,9 @@ public class GetAllCashFlowsUseCase
             Id = cashFlow.Id,
             Motive = cashFlow.Motive,
             Amount = cashFlow.Amount,
+            Type = cashFlow.Type,
             UserId = cashFlow.UserId,
+            CashBoxId = cashFlow.CashBoxId,
             CreatedAt = cashFlow.CreatedAt,
             UpdatedAt = cashFlow.UpdatedAt
         };

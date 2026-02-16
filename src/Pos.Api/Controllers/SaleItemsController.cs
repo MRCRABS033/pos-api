@@ -20,21 +20,16 @@ public class SaleItemsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<SaleItemResponseDto>> GetById(Guid id)
     {
-        try
-        {
-            var saleItem = await _saleItemService.GetByIdAsync(id);
-            return Ok(saleItem);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var saleItem = await _saleItemService.GetByIdAsync(id);
+        return Ok(saleItem);
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<SaleItemResponseDto>>> GetAll(
         [FromQuery] Guid? saleId,
-        [FromQuery] Guid? productId)
+        [FromQuery] Guid? productId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
     {
         if (saleId.HasValue)
         {
@@ -48,7 +43,7 @@ public class SaleItemsController : ControllerBase
             return Ok(byProduct);
         }
 
-        var items = await _saleItemService.GetAllAsync();
+        var items = await _saleItemService.GetAllAsync(page, pageSize);
         return Ok(items);
     }
 
@@ -57,15 +52,8 @@ public class SaleItemsController : ControllerBase
         [FromQuery] Guid saleId,
         [FromBody] SaleItemCreateDto dto)
     {
-        try
-        {
-            var created = await _saleItemService.CreateAsync(dto, saleId);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var created = await _saleItemService.CreateAsync(dto, saleId);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id:guid}")]
@@ -77,32 +65,14 @@ public class SaleItemsController : ControllerBase
         if (dto.Id != id)
             return BadRequest("El id del path no coincide con el id del body.");
 
-        try
-        {
-            var updated = await _saleItemService.UpdateAsync(dto);
-            return Ok(updated);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var updated = await _saleItemService.UpdateAsync(dto);
+        return Ok(updated);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            await _saleItemService.DeleteAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _saleItemService.DeleteAsync(id);
+        return NoContent();
     }
 }

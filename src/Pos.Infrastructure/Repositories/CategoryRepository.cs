@@ -74,11 +74,15 @@ public class CategoryRepository : ICategoryRepository
         return category;
     }
 
-    public async Task<IReadOnlyList<Category>> GetAllAsync()
+    public async Task<IReadOnlyList<Category>> GetAllAsync(int page = 1, int pageSize = 50)
     {
+        var normalizedPage = Math.Max(1, page);
+        var normalizedSize = Math.Clamp(pageSize, 1, 200);
+
         return await _context.Categories.AsNoTracking()
             .OrderBy(c => c.Name)
-            .Take(100)
+            .Skip((normalizedPage - 1) * normalizedSize)
+            .Take(normalizedSize)
             .ToListAsync();
     }
 }

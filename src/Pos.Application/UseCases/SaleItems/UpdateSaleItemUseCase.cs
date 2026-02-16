@@ -38,6 +38,7 @@ public class UpdateSaleItemUseCase
             Id = saleItem.Id,
             SaleId = saleItem.SaleId,
             ProductId = saleItem.ProductId,
+            ProductName = saleItem.Product?.Name,
             Quantity = saleItem.Quantity,
             UnitPrice = saleItem.UnitPrice
         };

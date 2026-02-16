@@ -20,19 +20,15 @@ public class CategoriesController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<CategoryResponseDto>> GetById(Guid id)
     {
-        try
-        {
-            var category = await _categoryService.GetByIdAsync(id);
-            return Ok(category);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var category = await _categoryService.GetByIdAsync(id);
+        return Ok(category);
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<CategoryResponseDto>>> GetAll([FromQuery] string? name)
+    public async Task<ActionResult<IReadOnlyList<CategoryResponseDto>>> GetAll(
+        [FromQuery] string? name,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
     {
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -42,22 +38,15 @@ public class CategoriesController : ControllerBase
             return Ok(result);
         }
 
-        var categories = await _categoryService.GetAllAsync();
+        var categories = await _categoryService.GetAllAsync(page, pageSize);
         return Ok(categories);
     }
 
     [HttpPost]
     public async Task<ActionResult<CategoryResponseDto>> Create([FromBody] CategoryCreateDto dto)
     {
-        try
-        {
-            var created = await _categoryService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var created = await _categoryService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id:guid}")]
@@ -69,32 +58,14 @@ public class CategoriesController : ControllerBase
         if (dto.Id != id)
             return BadRequest("El id del path no coincide con el id del body.");
 
-        try
-        {
-            var updated = await _categoryService.UpdateAsync(dto);
-            return Ok(updated);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var updated = await _categoryService.UpdateAsync(dto);
+        return Ok(updated);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            await _categoryService.DeleteAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _categoryService.DeleteAsync(id);
+        return NoContent();
     }
 }

@@ -31,7 +31,9 @@ public class SaleItemRepository : ISaleItemRepository
         if (id == Guid.Empty)
             throw new ArgumentNullException(nameof(id), "El id del item de venta no puede ser nulo.");
 
-        var saleItem = await _context.SaleItems.FirstOrDefaultAsync(i => i.Id == id);
+        var saleItem = await _context.SaleItems
+            .Include(i => i.Product)
+            .FirstOrDefaultAsync(i => i.Id == id);
 
         if (saleItem == null)
             throw new KeyNotFoundException("El item de venta que buscas no existe en la base de datos.");
@@ -70,7 +72,9 @@ public class SaleItemRepository : ISaleItemRepository
     {
         return await _context.SaleItems.AsNoTracking()
             .Where(i => i.SaleId == saleId)
+            .Include(i => i.Product)
             .OrderBy(i => i.Id)
+            .Take(500)
             .ToListAsync();
     }
 
@@ -78,15 +82,22 @@ public class SaleItemRepository : ISaleItemRepository
     {
         return await _context.SaleItems.AsNoTracking()
             .Where(i => i.ProductId == productId)
+            .Include(i => i.Product)
             .OrderBy(i => i.Id)
+            .Take(500)
             .ToListAsync();
     }
 
-    public async Task<IReadOnlyList<SaleItem>> GetAllAsync()
+    public async Task<IReadOnlyList<SaleItem>> GetAllAsync(int page = 1, int pageSize = 50)
     {
+        var normalizedPage = Math.Max(1, page);
+        var normalizedSize = Math.Clamp(pageSize, 1, 200);
+
         return await _context.SaleItems.AsNoTracking()
+            .Include(i => i.Product)
             .OrderBy(i => i.Id)
-            .Take(100)
+            .Skip((normalizedPage - 1) * normalizedSize)
+            .Take(normalizedSize)
             .ToListAsync();
     }
 }

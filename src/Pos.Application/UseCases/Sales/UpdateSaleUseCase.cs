@@ -50,6 +50,11 @@ public class UpdateSaleUseCase
         {
             Id = updated.Id,
             UserId = updated.UserId,
+            CashBoxId = updated.CashBoxId,
+            PaymentType = updated.PaymentType,
+            Total = updated.Total,
+            Discount = updated.Discount,
+            ItemsCount = items.Count,
             CreatedAt = updated.CreatedAt,
             UpdatedAt = updated.UpdatedAt,
             Items = items
@@ -63,6 +68,7 @@ public class UpdateSaleUseCase
             Id = saleItem.Id,
             SaleId = saleItem.SaleId,
             ProductId = saleItem.ProductId,
+            ProductName = saleItem.Product?.Name,
             Quantity = saleItem.Quantity,
             UnitPrice = saleItem.UnitPrice
         };

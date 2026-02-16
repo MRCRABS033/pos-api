@@ -13,9 +13,9 @@ public class GetAllUsersUseCase
         _userRepository = userRepository;
     }
 
-    public async Task<IReadOnlyList<UserResponseDto>> ExecuteAsync()
+    public async Task<IReadOnlyList<UserResponseDto>> ExecuteAsync(int page = 1, int pageSize = 50)
     {
-        var users = await _userRepository.GetAllAsync();
+        var users = await _userRepository.GetAllAsync(page, pageSize);
         return users.Select(Map).ToList();
     }
 

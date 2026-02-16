@@ -9,6 +9,7 @@ public class ProductService : IProductService
     private readonly CreateProductUseCase _createProduct;
     private readonly UpdateProductUseCase _updateProduct;
     private readonly GetProductByIdUseCase _getProductById;
+    private readonly GetProductBySkuUseCase _getProductBySku;
     private readonly SearchProductsUseCase _searchProducts;
     private readonly GetProductsByCategoryUseCase _getByCategory;
     private readonly GetAllProductsUseCase _getAll;
@@ -18,6 +19,7 @@ public class ProductService : IProductService
         CreateProductUseCase createProduct,
         UpdateProductUseCase updateProduct,
         GetProductByIdUseCase getProductById,
+        GetProductBySkuUseCase getProductBySku,
         SearchProductsUseCase searchProducts,
         GetProductsByCategoryUseCase getByCategory,
         GetAllProductsUseCase getAll,
@@ -26,6 +28,7 @@ public class ProductService : IProductService
         _createProduct = createProduct;
         _updateProduct = updateProduct;
         _getProductById = getProductById;
+        _getProductBySku = getProductBySku;
         _searchProducts = searchProducts;
         _getByCategory = getByCategory;
         _getAll = getAll;
@@ -47,6 +50,11 @@ public class ProductService : IProductService
         return _getProductById.ExecuteAsync(id);
     }
 
+    public Task<ProductResponseDto> GetBySkuAsync(string sku)
+    {
+        return _getProductBySku.ExecuteAsync(sku);
+    }
+
     public Task<IReadOnlyList<ProductResponseDto>> SearchAsync(string term)
     {
         return _searchProducts.ExecuteAsync(term);
@@ -57,9 +65,9 @@ public class ProductService : IProductService
         return _getByCategory.ExecuteAsync(categoryId);
     }
 
-    public Task<IReadOnlyList<ProductResponseDto>> GetAllAsync()
+    public Task<IReadOnlyList<ProductResponseDto>> GetAllAsync(int page = 1, int pageSize = 50)
     {
-        return _getAll.ExecuteAsync();
+        return _getAll.ExecuteAsync(page, pageSize);
     }
 
     public Task DeleteAsync(Guid id)

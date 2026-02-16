@@ -1,7 +1,5 @@
 namespace Pos.Domain.Entities;
 
-[Microsoft.EntityFrameworkCore.Index(nameof(Email), IsUnique = true)]
-[Microsoft.EntityFrameworkCore.Index(nameof(NormaliceName), IsUnique = true)]
 public class User
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -12,10 +10,14 @@ public class User
     public string? Email { get; set; }
     public string Password { get; set; }
     public string Role { get; set; } = "User";
+    public bool IsOwner { get; set; }
     public bool IsActive { get; set; }
     public DateTime Created { get; set; }
     public DateTime Modified { get; set; }
-    public ICollection<CashFlow> CashFlows { get; set; } = new List<CashFlow>();
-    public ICollection<Product> Products { get; set; } = new List<Product>();
-    public ICollection<Sale> Sales { get; set; } = new List<Sale>();
+    public virtual ICollection<CashBox> CashBoxes { get; set; } = new List<CashBox>();
+    public virtual ICollection<CashFlow> CashFlows { get; set; } = new List<CashFlow>();
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
+    public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
+    public virtual ICollection<Return> Returns { get; set; } = new List<Return>();
 }

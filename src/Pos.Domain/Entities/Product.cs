@@ -1,8 +1,5 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Pos.Domain.Entities;
 
-[Index(nameof(Sku), IsUnique = true)]
 public class Product
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -19,7 +16,7 @@ public class Product
     public User CreatedBy { get; set; } = default!;
     public Guid UpdatedById { get; set; }
     public User UpdatedBy { get; set; } = default!;
-    public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
-    public Category Category { get; set; }
-    public Guid CategoryId { get; set; }
+    public virtual ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
+    public virtual Category? Category { get; set; }
+    public Guid? CategoryId { get; set; }
 }

@@ -35,6 +35,7 @@ public class CreateUserUseCase
         };
 
         var created = await _userRepository.CreateAsync(user);
+        await _userRepository.SetDefaultPermissionsByRole(created.Id, created.Role);
         return Map(created);
     }
 

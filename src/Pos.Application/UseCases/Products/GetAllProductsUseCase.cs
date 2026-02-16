@@ -1,3 +1,4 @@
+using Pos.Application.Dtos.Categories;
 using Pos.Application.Dtos.Products;
 using Pos.Domain.Entities;
 using Pos.Domain.Interfaces.Repositories;
@@ -13,9 +14,9 @@ public class GetAllProductsUseCase
         _productRepository = productRepository;
     }
 
-    public async Task<IReadOnlyList<ProductResponseDto>> ExecuteAsync()
+    public async Task<IReadOnlyList<ProductResponseDto>> ExecuteAsync(int page = 1, int pageSize = 50)
     {
-        var products = await _productRepository.GetAllAsync();
+        var products = await _productRepository.GetAllAsync(page, pageSize);
         return products.Select(Map).ToList();
     }
 
@@ -31,7 +32,14 @@ public class GetAllProductsUseCase
             Stock = product.Stock,
             IsActive = product.IsActive,
             IsAvailable = product.IsAvailable,
-            CategoryId = product.CategoryId,
+            CategoryId = product.CategoryId ?? Guid.Empty,
+            Category = product.Category == null
+                ? null
+                : new CategoryResponseDto
+                {
+                    Id = product.Category.Id,
+                    Name = product.Category.Name
+                },
             CreatedAt = product.CreatedAt,
             UpdatedAt = product.UpdatedAt
         };

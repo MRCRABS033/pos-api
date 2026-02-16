@@ -22,6 +22,7 @@ public class ProductRepository : IProductRepository
 
         await _context.Products.AddAsync(product);
         await _context.SaveChangesAsync();
+        await _context.Entry(product).Reference(p => p.Category).LoadAsync();
         return product;
     }
 
@@ -30,7 +31,9 @@ public class ProductRepository : IProductRepository
         if (id == Guid.Empty)
             throw new ArgumentNullException(nameof(id), "El id del producot no puede ser nulo.");
         
-        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+        var product = await _context.Products
+            .Include(p => p.Category)
+            .FirstOrDefaultAsync(p => p.Id == id);
         
         if (product == null)
             throw new KeyNotFoundException("El producto que buscas no existe en la base de datos.");
@@ -43,7 +46,8 @@ public class ProductRepository : IProductRepository
         if (product is null)
             throw new ArgumentNullException(nameof(product));
 
-        var existing = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
+        var existing = _context.Products.Local.FirstOrDefault(p => p.Id == product.Id)
+                       ?? await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
         if (existing is null)
             throw new KeyNotFoundException("Producto no encontrado.");
 
@@ -59,6 +63,7 @@ public class ProductRepository : IProductRepository
         existing.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        await _context.Entry(existing).Reference(p => p.Category).LoadAsync();
         return existing;
     }
 
@@ -74,7 +79,9 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> GetByProductSku(string sku)
     {
-        var product = await _context.Products.FirstOrDefaultAsync(p => p.Sku == sku);
+        var product = await _context.Products
+            .Include(p => p.Category)
+            .FirstOrDefaultAsync(p => p.Sku == sku);
         if (product is null)
             throw new KeyNotFoundException("Producto no encontrado.");
         return product;
@@ -87,6 +94,7 @@ public class ProductRepository : IProductRepository
 
         return await _context.Products
             .AsNoTracking()
+            .Include(p => p.Category)
             .Where(p => EF.Functions.ILike(p.Name, $"%{term}%"))
             .OrderBy(p => p.Name)
             .Take(100)
@@ -96,17 +104,25 @@ public class ProductRepository : IProductRepository
     public async Task<IReadOnlyList<Product>> GetByCategoryId(Guid categoryId)
     {
         var products = await _context.Products.AsNoTracking()
+            .Include(p => p.Category)
             .Where(p => p.CategoryId == categoryId)
             .OrderBy(p => p.Name)
+            .Take(500)
             .ToListAsync();
         return products;
     }
 
-    public async Task<IReadOnlyList<Product>> GetAllAsync()
+    public async Task<IReadOnlyList<Product>> GetAllAsync(int page = 1, int pageSize = 50)
     {
+        var normalizedPage = Math.Max(1, page);
+        var normalizedSize = Math.Clamp(pageSize, 1, 200);
+
         return await _context.Products.AsNoTracking()
+            .Include(p => p.Category)
             .OrderBy(p => p.Name)
-            .Take(100)
+            .Skip((normalizedPage - 1) * normalizedSize)
+            .Take(normalizedSize)
             .ToListAsync();
     }
+
 }

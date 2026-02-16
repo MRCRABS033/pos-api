@@ -13,6 +13,8 @@ public class UserService : IUserService
     private readonly GetUserByNormaliceNameUseCase _getByNormaliceName;
     private readonly GetAllUsersUseCase _getAll;
     private readonly DeleteUserUseCase _delete;
+    private readonly GetUserPermissionsUseCase _getPermissions;
+    private readonly UpdateUserPermissionsUseCase _updatePermissions;
 
     public UserService(
         CreateUserUseCase create,
@@ -21,7 +23,9 @@ public class UserService : IUserService
         GetUserByEmailUseCase getByEmail,
         GetUserByNormaliceNameUseCase getByNormaliceName,
         GetAllUsersUseCase getAll,
-        DeleteUserUseCase delete)
+        DeleteUserUseCase delete,
+        GetUserPermissionsUseCase getPermissions,
+        UpdateUserPermissionsUseCase updatePermissions)
     {
         _create = create;
         _update = update;
@@ -30,6 +34,8 @@ public class UserService : IUserService
         _getByNormaliceName = getByNormaliceName;
         _getAll = getAll;
         _delete = delete;
+        _getPermissions = getPermissions;
+        _updatePermissions = updatePermissions;
     }
 
     public Task<UserResponseDto> CreateAsync(UserCreateDto dto)
@@ -57,13 +63,23 @@ public class UserService : IUserService
         return _getByNormaliceName.ExecuteAsync(normaliceName);
     }
 
-    public Task<IReadOnlyList<UserResponseDto>> GetAllAsync()
+    public Task<IReadOnlyList<UserResponseDto>> GetAllAsync(int page = 1, int pageSize = 50)
     {
-        return _getAll.ExecuteAsync();
+        return _getAll.ExecuteAsync(page, pageSize);
     }
 
     public Task DeleteAsync(Guid id)
     {
         return _delete.ExecuteAsync(id);
+    }
+
+    public Task<UserPermissionsResponseDto> GetPermissionsAsync(Guid userId)
+    {
+        return _getPermissions.ExecuteAsync(userId);
+    }
+
+    public Task<UserPermissionsResponseDto> UpdatePermissionsAsync(Guid actorUserId, Guid userId, UserPermissionsUpdateDto dto)
+    {
+        return _updatePermissions.ExecuteAsync(actorUserId, userId, dto);
     }
 }

@@ -49,9 +49,9 @@ public class CategoryService : ICategoryService
         return _getByName.ExecuteAsync(name);
     }
 
-    public Task<IReadOnlyList<CategoryResponseDto>> GetAllAsync()
+    public Task<IReadOnlyList<CategoryResponseDto>> GetAllAsync(int page = 1, int pageSize = 50)
     {
-        return _getAll.ExecuteAsync();
+        return _getAll.ExecuteAsync(page, pageSize);
     }
 
     public Task DeleteAsync(Guid id)

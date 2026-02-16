@@ -6,5 +6,6 @@ public interface IRepository <TEntity>
     Task<TEntity> UpdateAsync(TEntity entity);
     Task<TEntity> GetByIdAsync(Guid id);
     Task DeleteAsync(Guid id);
-    Task<IReadOnlyList<TEntity>> GetAllAsync();
+    Task<IReadOnlyList<TEntity>> GetAllAsync(int page = 1, int pageSize = 50);
+    
 }

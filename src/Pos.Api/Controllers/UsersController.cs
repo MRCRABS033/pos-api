@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pos.Application.Dtos.Users;
 using Pos.Application.Interfaces.Services;
+using Pos.Domain.Security;
 
 namespace Pos.Api.Controllers;
 
@@ -18,23 +19,39 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = PermissionCodes.UsersRead)]
     public async Task<ActionResult<UserResponseDto>> GetById(Guid id)
     {
-        try
-        {
-            var user = await _userService.GetByIdAsync(id);
-            return Ok(user);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var user = await _userService.GetByIdAsync(id);
+        return Ok(user);
+    }
+
+    [HttpGet("{id:guid}/permissions")]
+    [Authorize(Policy = PermissionCodes.PermissionsRead)]
+    public async Task<ActionResult<UserPermissionsResponseDto>> GetPermissions(Guid id)
+    {
+        var permissions = await _userService.GetPermissionsAsync(id);
+        return Ok(permissions);
+    }
+
+    [HttpPut("{id:guid}/permissions")]
+    [Authorize(Policy = "CanManagePermissions")]
+    public async Task<ActionResult<UserPermissionsResponseDto>> UpdatePermissions(
+        Guid id,
+        [FromBody] UserPermissionsUpdateDto dto)
+    {
+        var actorUserId = GetUserId();
+        var permissions = await _userService.UpdatePermissionsAsync(actorUserId, id, dto);
+        return Ok(permissions);
     }
 
     [HttpGet]
+    [Authorize(Policy = PermissionCodes.UsersRead)]
     public async Task<ActionResult<IReadOnlyList<UserResponseDto>>> GetAll(
         [FromQuery] string? email,
-        [FromQuery] string? normaliceName)
+        [FromQuery] string? normaliceName,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
     {
         if (!string.IsNullOrWhiteSpace(email))
         {
@@ -52,29 +69,20 @@ public class UsersController : ControllerBase
             return Ok(user);
         }
 
-        var users = await _userService.GetAllAsync();
+        var users = await _userService.GetAllAsync(page, pageSize);
         return Ok(users);
     }
 
     [HttpPost]
+    [Authorize(Policy = PermissionCodes.UsersCreate)]
     public async Task<ActionResult<UserResponseDto>> Create([FromBody] UserCreateDto dto)
     {
-        try
-        {
-            var created = await _userService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        var created = await _userService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = PermissionCodes.UsersUpdate)]
     public async Task<ActionResult<UserResponseDto>> Update(Guid id, [FromBody] UserUpdateDto dto)
     {
         if (dto.Id == Guid.Empty)
@@ -83,32 +91,23 @@ public class UsersController : ControllerBase
         if (dto.Id != id)
             return BadRequest("El id del path no coincide con el id del body.");
 
-        try
-        {
-            var updated = await _userService.UpdateAsync(dto);
-            return Ok(updated);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var updated = await _userService.UpdateAsync(dto);
+        return Ok(updated);
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = PermissionCodes.UsersDelete)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            await _userService.DeleteAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _userService.DeleteAsync(id);
+        return NoContent();
+    }
+
+    private Guid GetUserId()
+    {
+        var claim = User.FindFirst("userId")?.Value;
+        if (string.IsNullOrWhiteSpace(claim) || !Guid.TryParse(claim, out var userId))
+            throw new UnauthorizedAccessException("Usuario no autenticado.");
+        return userId;
     }
 }

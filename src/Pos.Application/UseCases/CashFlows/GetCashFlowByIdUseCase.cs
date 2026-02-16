@@ -26,7 +26,9 @@ public class GetCashFlowByIdUseCase
             Id = cashFlow.Id,
             Motive = cashFlow.Motive,
             Amount = cashFlow.Amount,
+            Type = cashFlow.Type,
             UserId = cashFlow.UserId,
+            CashBoxId = cashFlow.CashBoxId,
             CreatedAt = cashFlow.CreatedAt,
             UpdatedAt = cashFlow.UpdatedAt
         };

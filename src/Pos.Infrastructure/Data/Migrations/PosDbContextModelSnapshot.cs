@@ -22,6 +22,50 @@ namespace Pos.Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Pos.Domain.Entities.CashBox", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ActualBalance")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("CardTotal")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("CashTotal")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("ExpectatedBalance")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("OpeningBalance")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TicketsCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CashBoxes");
+                });
+
             modelBuilder.Entity("Pos.Domain.Entities.CashFlow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -31,12 +75,18 @@ namespace Pos.Infrastructure.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
+                    b.Property<Guid?>("CashBoxId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Motive")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -45,6 +95,8 @@ namespace Pos.Infrastructure.Data.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CashBoxId");
 
                     b.HasIndex("UserId");
 
@@ -63,7 +115,31 @@ namespace Pos.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.Permission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("Pos.Domain.Entities.Product", b =>
@@ -72,7 +148,7 @@ namespace Pos.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -105,6 +181,7 @@ namespace Pos.Infrastructure.Data.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<DateTime>("UpdatedAt")
+                        .IsConcurrencyToken()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UpdatedById")
@@ -124,7 +201,7 @@ namespace Pos.Infrastructure.Data.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Pos.Domain.Entities.Sale", b =>
+            modelBuilder.Entity("Pos.Domain.Entities.Return", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -133,19 +210,94 @@ namespace Pos.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("PaymentType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("SaleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SaleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Returns");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.ReturnItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("ReturnId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SaleItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ReturnId");
+
+                    b.HasIndex("SaleItemId");
+
+                    b.ToTable("ReturnItems");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.Sale", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CashBoxId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("Discount")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("PaymentType")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Total")
                         .HasColumnType("numeric");
 
                     b.Property<DateTime>("UpdatedAt")
+                        .IsConcurrencyToken()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CashBoxId");
 
                     b.HasIndex("UserId");
 
@@ -174,7 +326,7 @@ namespace Pos.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("SaleId");
+                    b.HasIndex("SaleId", "ProductId");
 
                     b.ToTable("SaleItems");
                 });
@@ -193,6 +345,11 @@ namespace Pos.Infrastructure.Data.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<bool>("IsOwner")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -225,19 +382,101 @@ namespace Pos.Infrastructure.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
+                    b.HasIndex("IsOwner")
+                        .IsUnique()
+                        .HasFilter("\"IsOwner\" = TRUE");
+
                     b.HasIndex("NormaliceName")
                         .IsUnique();
 
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Pos.Domain.Entities.UserActivityLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ActivityType")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid?>("CashBoxId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("QuantityDelta")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashBoxId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserActivityLogs");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.UserPermission", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("UserPermissions");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.CashBox", b =>
+                {
+                    b.HasOne("Pos.Domain.Entities.User", "User")
+                        .WithMany("CashBoxes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Pos.Domain.Entities.CashFlow", b =>
                 {
+                    b.HasOne("Pos.Domain.Entities.CashBox", "CashBox")
+                        .WithMany("CashFlows")
+                        .HasForeignKey("CashBoxId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Pos.Domain.Entities.User", "User")
                         .WithMany("CashFlows")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CashBox");
 
                     b.Navigation("User");
                 });
@@ -246,9 +485,7 @@ namespace Pos.Infrastructure.Data.Migrations
                 {
                     b.HasOne("Pos.Domain.Entities.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CategoryId");
 
                     b.HasOne("Pos.Domain.Entities.User", "CreatedBy")
                         .WithMany("Products")
@@ -269,13 +506,66 @@ namespace Pos.Infrastructure.Data.Migrations
                     b.Navigation("UpdatedBy");
                 });
 
+            modelBuilder.Entity("Pos.Domain.Entities.Return", b =>
+                {
+                    b.HasOne("Pos.Domain.Entities.Sale", "Sale")
+                        .WithMany()
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pos.Domain.Entities.User", "User")
+                        .WithMany("Returns")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sale");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.ReturnItem", b =>
+                {
+                    b.HasOne("Pos.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pos.Domain.Entities.Return", "Return")
+                        .WithMany("Items")
+                        .HasForeignKey("ReturnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pos.Domain.Entities.SaleItem", "SaleItem")
+                        .WithMany()
+                        .HasForeignKey("SaleItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Return");
+
+                    b.Navigation("SaleItem");
+                });
+
             modelBuilder.Entity("Pos.Domain.Entities.Sale", b =>
                 {
+                    b.HasOne("Pos.Domain.Entities.CashBox", "CashBox")
+                        .WithMany("Sales")
+                        .HasForeignKey("CashBoxId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Pos.Domain.Entities.User", "User")
                         .WithMany("Sales")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CashBox");
 
                     b.Navigation("User");
                 });
@@ -299,14 +589,75 @@ namespace Pos.Infrastructure.Data.Migrations
                     b.Navigation("Sale");
                 });
 
+            modelBuilder.Entity("Pos.Domain.Entities.UserActivityLog", b =>
+                {
+                    b.HasOne("Pos.Domain.Entities.CashBox", "CashBox")
+                        .WithMany()
+                        .HasForeignKey("CashBoxId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Pos.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Pos.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashBox");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.UserPermission", b =>
+                {
+                    b.HasOne("Pos.Domain.Entities.Permission", "Permission")
+                        .WithMany("UserPermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pos.Domain.Entities.User", "User")
+                        .WithMany("UserPermissions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.CashBox", b =>
+                {
+                    b.Navigation("CashFlows");
+
+                    b.Navigation("Sales");
+                });
+
             modelBuilder.Entity("Pos.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("Pos.Domain.Entities.Permission", b =>
+                {
+                    b.Navigation("UserPermissions");
+                });
+
             modelBuilder.Entity("Pos.Domain.Entities.Product", b =>
                 {
                     b.Navigation("SaleItems");
+                });
+
+            modelBuilder.Entity("Pos.Domain.Entities.Return", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Pos.Domain.Entities.Sale", b =>
@@ -316,11 +667,17 @@ namespace Pos.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Pos.Domain.Entities.User", b =>
                 {
+                    b.Navigation("CashBoxes");
+
                     b.Navigation("CashFlows");
 
                     b.Navigation("Products");
 
+                    b.Navigation("Returns");
+
                     b.Navigation("Sales");
+
+                    b.Navigation("UserPermissions");
                 });
 #pragma warning restore 612, 618
         }

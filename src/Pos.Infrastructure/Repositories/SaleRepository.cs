@@ -44,7 +44,8 @@ public class SaleRepository : ISaleRepository
         if (sale is null)
             throw new ArgumentNullException(nameof(sale));
 
-        var existing = await _context.Sales.FirstOrDefaultAsync(s => s.Id == sale.Id);
+        var existing = _context.Sales.Local.FirstOrDefault(s => s.Id == sale.Id)
+                       ?? await _context.Sales.FirstOrDefaultAsync(s => s.Id == sale.Id);
         if (existing is null)
             throw new KeyNotFoundException("Venta no encontrada.");
 
@@ -69,6 +70,7 @@ public class SaleRepository : ISaleRepository
         return await _context.Sales.AsNoTracking()
             .Where(s => s.UserId == userId)
             .OrderByDescending(s => s.CreatedAt)
+            .Take(500)
             .ToListAsync();
     }
 
@@ -77,14 +79,66 @@ public class SaleRepository : ISaleRepository
         return await _context.Sales.AsNoTracking()
             .Where(s => s.CreatedAt >= startDate && s.CreatedAt <= endDate)
             .OrderByDescending(s => s.CreatedAt)
+            .Take(500)
             .ToListAsync();
     }
 
-    public async Task<IReadOnlyList<Sale>> GetAllAsync()
+    public async Task<IReadOnlyList<Sale>> GetByCashBoxId(Guid cashBoxId)
     {
         return await _context.Sales.AsNoTracking()
+            .Where(s => s.CashBoxId == cashBoxId)
             .OrderByDescending(s => s.CreatedAt)
-            .Take(100)
+            .Take(500)
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyList<SaleWithItemsCount>> GetByCashBoxIdWithItemsCount(Guid cashBoxId)
+    {
+        return await _context.Sales.AsNoTracking()
+            .Where(s => s.CashBoxId == cashBoxId)
+            .OrderByDescending(s => s.CreatedAt)
+            .Select(s => new SaleWithItemsCount(s, s.Items.Count))
+            .Take(500)
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyList<SalesByDepartmentRow>> GetSalesByDepartmentByCashBoxId(Guid cashBoxId)
+    {
+        var grouped = await _context.SaleItems.AsNoTracking()
+            .Where(i => i.Sale.CashBoxId == cashBoxId)
+            .GroupBy(i => new
+            {
+                i.Product.CategoryId,
+                CategoryName = i.Product.Category == null ? null : i.Product.Category.Name
+            })
+            .Select(group => new
+            {
+                group.Key.CategoryId,
+                group.Key.CategoryName,
+                TotalSales = group.Sum(x => x.Quantity * x.UnitPrice),
+                ItemsCount = group.Count()
+            })
+            .OrderByDescending(x => x.TotalSales)
+            .ToListAsync();
+
+        return grouped
+            .Select(x => new SalesByDepartmentRow(
+                x.CategoryId,
+                x.CategoryName,
+                x.TotalSales,
+                x.ItemsCount))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<Sale>> GetAllAsync(int page = 1, int pageSize = 50)
+    {
+        var normalizedPage = Math.Max(1, page);
+        var normalizedSize = Math.Clamp(pageSize, 1, 200);
+
+        return await _context.Sales.AsNoTracking()
+            .OrderByDescending(s => s.CreatedAt)
+            .Skip((normalizedPage - 1) * normalizedSize)
+            .Take(normalizedSize)
             .ToListAsync();
     }
 }

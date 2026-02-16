@@ -8,6 +8,6 @@ public interface ICategoryService
     Task<CategoryResponseDto> UpdateAsync(CategoryUpdateDto dto);
     Task<CategoryResponseDto> GetByIdAsync(Guid id);
     Task<CategoryResponseDto?> GetByNameAsync(string name);
-    Task<IReadOnlyList<CategoryResponseDto>> GetAllAsync();
+    Task<IReadOnlyList<CategoryResponseDto>> GetAllAsync(int page = 1, int pageSize = 50);
     Task DeleteAsync(Guid id);
 }

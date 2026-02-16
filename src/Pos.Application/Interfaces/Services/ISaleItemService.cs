@@ -9,6 +9,6 @@ public interface ISaleItemService
     Task<SaleItemResponseDto> GetByIdAsync(Guid id);
     Task<IReadOnlyList<SaleItemResponseDto>> GetBySaleIdAsync(Guid saleId);
     Task<IReadOnlyList<SaleItemResponseDto>> GetByProductIdAsync(Guid productId);
-    Task<IReadOnlyList<SaleItemResponseDto>> GetAllAsync();
+    Task<IReadOnlyList<SaleItemResponseDto>> GetAllAsync(int page = 1, int pageSize = 50);
     Task DeleteAsync(Guid id);
 }

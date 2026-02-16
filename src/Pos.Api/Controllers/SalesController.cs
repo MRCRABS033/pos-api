@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pos.Application.Dtos.Sales;
+using Pos.Application.Dtos.Returns;
 using Pos.Application.Interfaces.Services;
 
 namespace Pos.Api.Controllers;
@@ -11,36 +12,55 @@ namespace Pos.Api.Controllers;
 public class SalesController : ControllerBase
 {
     private readonly ISaleService _saleService;
+    private readonly IReturnService _returnService;
 
-    public SalesController(ISaleService saleService)
+    public SalesController(ISaleService saleService, IReturnService returnService)
     {
         _saleService = saleService;
+        _returnService = returnService;
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<SaleResponseDto>> GetById(Guid id)
     {
-        try
-        {
-            var sale = await _saleService.GetByIdAsync(id);
-            return Ok(sale);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var sale = await _saleService.GetByIdAsync(id);
+        return Ok(sale);
+    }
+
+    [HttpPost("{saleId:guid}/returns")]
+    public async Task<ActionResult<ReturnResponseDto>> CreateReturn(Guid saleId, [FromBody] ReturnCreateDto dto)
+    {
+        var userId = GetUserId();
+        var created = await _returnService.CreateAsync(saleId, dto, userId);
+        return Ok(created);
+    }
+
+    [HttpGet("{saleId:guid}/returns")]
+    public async Task<ActionResult<IReadOnlyList<ReturnResponseDto>>> GetReturns(Guid saleId)
+    {
+        var returns = await _returnService.GetBySaleIdAsync(saleId);
+        return Ok(returns);
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<SaleResponseDto>>> GetAll(
         [FromQuery] Guid? userId,
+        [FromQuery] Guid? cashBoxId,
         [FromQuery] DateTime? startDate,
-        [FromQuery] DateTime? endDate)
+        [FromQuery] DateTime? endDate,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
     {
         if (userId.HasValue)
         {
             var byUser = await _saleService.GetByUserIdAsync(userId.Value);
             return Ok(byUser);
+        }
+
+        if (cashBoxId.HasValue)
+        {
+            var byCashBox = await _saleService.GetByCashBoxIdAsync(cashBoxId.Value);
+            return Ok(byCashBox);
         }
 
         if (startDate.HasValue && endDate.HasValue)
@@ -49,23 +69,16 @@ public class SalesController : ControllerBase
             return Ok(byDate);
         }
 
-        var sales = await _saleService.GetAllAsync();
+        var sales = await _saleService.GetAllAsync(page, pageSize);
         return Ok(sales);
     }
 
     [HttpPost]
     public async Task<ActionResult<SaleResponseDto>> Create([FromBody] SaleCreateDto dto)
     {
-        try
-        {
-            var userId = GetUserId();
-            var created = await _saleService.CreateAsync(dto, userId);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var userId = GetUserId();
+        var created = await _saleService.CreateAsync(dto, userId);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id:guid}")]
@@ -77,34 +90,16 @@ public class SalesController : ControllerBase
         if (dto.Id != id)
             return BadRequest("El id del path no coincide con el id del body.");
 
-        try
-        {
-            var userId = GetUserId();
-            var updated = await _saleService.UpdateAsync(dto, userId);
-            return Ok(updated);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var userId = GetUserId();
+        var updated = await _saleService.UpdateAsync(dto, userId);
+        return Ok(updated);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            await _saleService.DeleteAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _saleService.DeleteAsync(id);
+        return NoContent();
     }
 
     private Guid GetUserId()
