@@ -15,6 +15,7 @@ public static class PermissionProfiles
         PermissionCodes.ProductsRead,
         PermissionCodes.SalesRead,
         PermissionCodes.SalesCreate,
+        PermissionCodes.CashBoxOpen,
         PermissionCodes.ReturnsRead,
         PermissionCodes.ReturnsCreate,
         PermissionCodes.CashBoxRead,
